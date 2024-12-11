@@ -40,10 +40,14 @@ end
 disp('Matrix for number1:');
 disp(mat1);
 
-weights=zeros(5,6)
-for i= 1:5
-    for j= 1:6
-        weights(i,j)=(1/30)*mat1(i,i)*mat1(i,j);
+weights = zeros(5, 6);
+for i = 1:5
+    for j = 1:6
+        if i == j
+            weights(i, j) = 0; % Set diagonal elements to zero
+        else
+            weights(i, j) = (1/30) * mat1(i, i) * mat1(i, j);
+        end
     end
 end
 
