@@ -23,7 +23,7 @@ params.R_s  = 200;
 %params.t_delay = 0.1e-4;
 
 %generating random resistance and vc values for n cells
-n = 20; % no of cells
+n = 30; % no of cells
 
 A = rand(n);
 A = 60 + (A * (80 - 60));
@@ -77,8 +77,27 @@ disp(attr_table);
 
 
 %plot_sep(Y, t); %plot separate graphs
-plot_overlap(Y, t); %plot overlapping graphs
+%plot_overlap(Y, t); %plot overlapping graphs
+pixel_mat = attr_mat(5,:)
+image(pixel_mat)
 
+
+function image(pixel_mat)
+    %convert pixel values to images
+    image_mat = reshape(pixel_mat, 6,5)
+    
+    % Step 2: Convert to logical format (optional, for clarity)
+    binaryImage = logical(image_mat);
+    
+    % Step 3: Display the binary image
+    imshow(binaryImage, 'InitialMagnification', 500); % Scaled up for visibility
+    title('Binary Image: Black and White');
+    
+    % Step 4: Save the image as a binary PNG
+    imwrite(binaryImage, 'binaryImage.png');
+    
+    disp('Image saved as binaryImage.png');
+end
 
 %ode function
 function dydt = odeMatrix(t, y, res_mat, params)
