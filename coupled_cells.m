@@ -1,3 +1,5 @@
+tic;
+
 clc;
 clear;
 close all;
@@ -26,7 +28,7 @@ params.R_s  = 200;
 n = 30; % no of cells
 
 A = rand(n);
-A = 60 + (A * (80 - 60));
+A = 10 + (A * (20 - 10));
 A(1:10+1:end) = 1;
 A = (A + A') / 2;
 res_mat = A .* 1000;
@@ -35,20 +37,16 @@ B = [rand(1, n); 300*ones(1,n)];
 var_mat = B;
 
 % %these are the values for the resistor between two cells
-% res_mat =       [ 1, 80, 50, 65;      %resistance values for connections to the first cell
-%                  80,  1, 70, 78;      %resistance values for connections to the second cell and so on
-%                  50, 70,  1, 30;
-%                  65, 78, 30,  1;] .* 1000; 
-% 
-% 
+% res_mat =       [ 1, 2.5;
+%                   2.5, 1] .* 1000; 
+% % 
+% % 
 % 
 % 
 % 
 % %Initial conditions
-% var_mat    =    [ 0.1, 300;     % V_c1, T_1
-%                  0.44, 300;     % V_c2, T_2 and so on
-%                  0.67, 300;
-%                  0.98, 300]';    
+% var_mat    =    [ 0, 300;     % V_c1, T_1
+%                  0.69, 300]';    
 
 
 
@@ -57,31 +55,41 @@ var_flat = var_mat(:); %flatting the intial condition matrix for input in ODE
 %initial time delays for inputs to each circuit
 %t_delay = [0, 0, 0];
 
-t_span = [0:0.0001e-4:2.5e-4]; %time span of simulation
+t_span = [0:0.0001e-6:2.5e-4]; %time span of simulation
 
 
 odeFunc = @(t, y) odeMatrix(t, y, res_mat, params);
-[t, y] = ode45(odeFunc, t_span, var_flat);
+%[t, y] = ode45(odeFunc, t_span, var_flat); %ode45 solver
+[t, y] = ode15s(odeFunc, t_span, var_flat); %ode15s solver
+if isempty(y)
+    error('Simulation returned no data.');
+end
+
 
 Y = reshape(y', 2, [], length(t)); %reshape output to a 2*N matrix
 %disp(size(Y, 2));
 
-attr_mat = attrib(Y, t);
-%disp(attr_mat);
 
-%for displaying the matrix with labels
-rows = {'Amplitude(V)', 'Time Period(s)', 'Frequency(Hz)', 'Phase Shift wrt V1(deg)', 'Pixel Value'};
-cols = arrayfun(@(x) ['CELL ', num2str(x)], 1:size(attr_mat, 2), 'UniformOutput', false);
-attr_table = array2table(attr_mat, 'VariableNames', cols, 'RowNames', rows);
-disp(attr_table);
+% %for displaying the matrix with labels
+% rows = {'Amplitude(V)', 'Time Period(s)', 'Frequency(Hz)', 'Phase Shift wrt V1(deg)', 'Pixel Value'};
+% cols = arrayfun(@(x) ['CELL ', num2str(x)], 1:size(attr_mat, 2), 'UniformOutput', false);
+% attr_table = array2table(attr_mat, 'VariableNames', cols, 'RowNames', rows);
+% disp(attr_table);
 
 
 %plot_sep(Y, t); %plot separate graphs
 %plot_overlap(Y, t); %plot overlapping graphs
-pixel_mat = attr_mat(5,:)
-image(pixel_mat)
+
+% attr_mat = attrib(Y, t);
+% disp(attr_mat);
 
 
+%plotting a single image
+% pixel_mat = attr_mat(5,:);
+% image(pixel_mat)
+
+Elapsed_time = toc
+%function to plot a single image
 function image(pixel_mat)
     %convert pixel values to images
     image_mat = reshape(pixel_mat, 6,5)
@@ -147,7 +155,7 @@ end
 %calculating the attributes(amplitude, time period, frequency, and PHASE SHIFT) for different signals
 function attr_mat = attrib(inp_mat, t)
     
-    attr_mat = zeros(5, size(inp_mat, 1));
+    attr_mat = zeros(23, size(inp_mat, 1));
     n = size(inp_mat, 2); % no of cells
 
     t_0 = 0.0;  % Start looking for the lag after 2 seconds
@@ -163,7 +171,7 @@ function attr_mat = attrib(inp_mat, t)
     
         % Find the time period
         [pks, locs] = findpeaks(y, start_idx); % Find peaks and their time indices
-        attr_mat(2, a) = mean(diff(locs)) * 1e-8; % Average time difference between peaks
+        attr_mat(2, a) = mean(diff(locs)) * 1e-10; % Average time difference between peaks
     
         % frequency
         attr_mat(3, a) = 1 ./ attr_mat(2, a);
@@ -172,54 +180,68 @@ function attr_mat = attrib(inp_mat, t)
     end
     
     %for phase diff
+    t1= 1.5e-5;
+    av_tp = sum(attr_mat(2, :)) / size(attr_mat, 2)
     
-    t1= 2.14e-4;
-    av_tp = sum(attr_mat(2, :)) / size(attr_mat, 2);
-    t2 = t1+ av_tp;
-
-    t_ind = (t>= t1) & (t <=t2);
-    t_rest = t(t_ind);
-
-    for a = 1:n
-%         ref_wave = inp_mat(1, :);
-%         curr_wave = inp_mat(a, :);
+    
+    for num = 1:10
+        disp("time section")
+        disp(num)
         
-        ref_wave = squeeze(inp_mat(1,1,:));
-        curr_wave =squeeze(inp_mat(1,a,:));
+        t2 = t1 + av_tp;
+        t_ind = (t>= t1) & (t <=t2);
+        t_rest = t(t_ind);
 
-        ref_rest = ref_wave(t_ind);
-        curr_rest = curr_wave(t_ind);
-
-        [peak1, loc1] = findpeaks(ref_rest, t_rest);
-        [peak2, loc2] = findpeaks(curr_rest, t_rest);
-        
-        if length(loc1) == length(loc2)
-            delta = loc2 - loc1;
-        else
-            disp('No of peaks of wave 1');
-            disp(num2str(length(loc1)));
-            disp('No of peaks of wave 2');
-            disp(num2str(length(loc2)));
+    
+        for a = 1:n
+    %         ref_wave = inp_mat(1, :);
+    %         curr_wave = inp_mat(a, :);
             
-        end
+            ref_wave = squeeze(inp_mat(1,1,:));
+            curr_wave =squeeze(inp_mat(1,a,:));
+    
+            ref_rest = ref_wave(t_ind);
+            curr_rest = curr_wave(t_ind);
+            
+    
+            [peak1, loc1] = findpeaks(ref_rest, t_rest);
+            [peak2, loc2] = findpeaks(curr_rest, t_rest);
 
-        phase_diff = 360 * delta / av_tp;
+%             disp("current loop")
+%             disp(a)
+            
+
+            if length(loc1) == length(loc2)
+                delta = loc2(1) - loc1(1);
+            else
+%                 disp('No of peaks of wave 1');
+%                 disp(num2str(length(loc1)));
+%                 disp('No of peaks of wave 2');
+%                 disp(num2str(length(loc2)));
+                
+            end
+    
+            phase_diff = 360 * delta / av_tp;
+            
+            %phase_scaled = mod(phase_diff + 180, 360) - 180; %phase difference in [-180, 180]
+            phase_scaled = mod(phase_diff, 360); %phase difference in [0, 360]
+            
+            r1 = 2 * num +2;
+            r2= 2* num + 3;
+            attr_mat(r1, a) = phase_scaled;
+    
+            %for pixel values
+            if phase_scaled >= 180 
+                attr_matr(r2, a) = 0;    %black pixel
+            else
+                attr_mat(r2, a) = 1;     %white pixel
+            end
+    
+        end
+        %disp(attr_mat);
+        t1 = t2;
         
-        %phase_scaled = mod(phase_diff + 180, 360) - 180; %phase difference in [-180, 180]
-        phase_scaled = mod(phase_diff, 360); %phase difference in [0, 360]
-
-        attr_mat(4, a) = phase_scaled;
-
-        %for pixel values
-        if phase_scaled >= 180 
-            attr_matr(5, a) = 0;    %black pixel
-        else
-            attr_mat(5, a) = 1;     %white pixel
-        end
-
     end
-    %disp(attr_mat);
-   
 
 end
 
@@ -263,7 +285,7 @@ function plot_overlap(Y, t)
         ylabel('V');
         title('Values of V');
         %xlim([0 0.2]);
-        ylim([0.8 1]);
+        %ylim([0.8 1]);
         grid on;
         hold on;
 
