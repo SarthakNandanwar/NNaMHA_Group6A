@@ -48,10 +48,10 @@ disp(weights_matrix);
 % Save the weights matrix to a file
 save('weights_matrix.mat', 'weights_matrix');
 
-imagesc(weights_matrix)
+imagesc(weights_matrix);
 
 
-%% Extracting the Weights Vector (Upper Triangle og the Weights Matrix) %%
+%% Extracting the Weights Vector (Upper Triangle of the Weights Matrix) %%
 
 % Extract the upper right triangle (excluding the diagonal)
 upper_triangle_indices = triu(true(num_pixels), 1); % Create a logical mask for upper triangle
@@ -85,8 +85,8 @@ imagesc(linear_res_mat);
 
 
 %% Sigmoid Mappin %%%%%%%%%%%%%%%%%%%%
-sig_res =  (1 ./ (1 + exp(-weights_vector)))*100000;
-sig_res_mat =  (1 ./ (1 + exp(-weights_matrix)))*100000;
+sig_res =  (1 ./ (1 + exp(-weights_vector)))*10000;
+sig_res_mat =  (1 ./ (1 + exp(-weights_matrix)))*10000;
 minValue2 = min(sig_res(:)); % Overall minimum
 maxValue2 = max(sig_res(:)); % Overall maximum
 
@@ -118,8 +118,8 @@ imagesc(exp_res_mat);
 
 
 %% Tuned Linear Mapping %%%%%%%%%%%%%%%%%%%%%
-tune_linear_res = weights_vector.*1000000 + 10000;
-tune_linear_res_mat = weights_matrix.*1000000 + 10000;
+tune_linear_res = (weights_vector.*1000000 + 10000)*0.8;
+tune_linear_res_mat = (weights_matrix.*1000000 + 10000)*0.8;
 minValue4 = min(tune_linear_res(:)); % Overall minimum
 maxValue4 = max(tune_linear_res(:)); % Overall maximum
 
@@ -135,8 +135,8 @@ imagesc(tune_linear_res_mat);
 
 
 %% Medium Linear Mapping %%%%%%%%%%%%%%%%%%%%%
-med_linear_res = weights_vector.*100000 + 10000;
-med_linear_res_mat = weights_matrix.*100000 + 10000;
+med_linear_res = (weights_vector.*100000 + 10000)*2.4;
+med_linear_res_mat = (weights_matrix.*100000 + 10000)*2.4;
 minValue5 = min(med_linear_res(:)); % Overall minimum
 maxValue5 = max(med_linear_res(:)); % Overall maximum
 
@@ -213,8 +213,8 @@ imagesc(log_mat);
 %     training_images(:, i) = img_vector;
 % end
 % 
-% disp('training_images is:')
-% disp(training_images)
+% disp('training_images is:');
+% disp(training_images);
 % 
 % 
 % % Initialize the weights matrix
