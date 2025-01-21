@@ -1,6 +1,4 @@
 tic;
-clc;
-clear;
 
 format long g;
 syms x;
@@ -23,55 +21,70 @@ params.R_s  = 200;
 %% V_c and resistor values for different input images
 
 %V_c
-v_data = load('V_c_init_col_mat.mat')
-input_v = v_data.V_c_init_col_mat
-image_no = 1; %from 1 to 7
+v_data = load('V_c_init_col_mat.mat');
+input_v = v_data.V_c_init_col_mat;
+image_no = 2; %from 1 to 7
 
 var_mat = extract_vc(input_v, image_no);
+
 
 
 
 %Resistor values
 
 %Mapping function: Exponential
-r_data  = load('exp_weights_mat.mat');
-inp = r_data.exp_res_mat;
+% r_data  = load('exp_weights_mat.mat');
+% inp = r_data.exp_res_mat;
 % 
-% %Mapping function: Sigmoid
+%Mapping function: Sigmoid
 % r_data  = load('sigmoid_weights_mat.mat');
 % inp = r_data.sig_res_mat;
-% 
-% %Mapping function: Linear
+
+% Mapping function: Linear
 % r_data  = load('linear_res_mat.mat');
 % inp = r_data.linear_res_mat;
 % 
-% %Mapping function: Tuned Linear
+% Mapping function: Tuned Linear
 % r_data  = load('tune_linear_res_mat.mat');
 % inp = r_data.tune_linear_res_mat;
-% 
+
 % %Mapping function: Medium Linear
 % r_data  = load('med_linear_res_mat.mat');
 % inp = r_data.med_linear_res_mat;
+
+%Mapping function: Medium LInear Test
+r_data = load("med_linear_res_mat_test.mat")
+inp = r_data.med_linear_res_mat_test;
 
 n = size(inp, 1);
 inp(1:n+1:end) = 1;
 
 res_mat = inp;
-
+%imagesc(res_mat)
 %% Random values for V_C and resistor matrix
 % 
 % %generating random resistance and vc values for n cells
-% n = 9; % no of cells
-% 
-% A = rand(n);
-% A = 10 + (A * (50 - 10));
-% A(1:10+1:end) = 1;
-% A = (A + A') / 2;
-% res_mat = A .* 1000;
-% 
+%n = 49; % no of cells
+% % 
+% % A = rand(n);
+% % A = 10 + (A * (50 - 10));
+% % A(1:10+1:end) = 1;
+% % A = (A + A') / 2;
+% % res_mat = A .* 1000;
+% % 
 % B = [rand(1, n); 300*ones(1,n)];
+% 
+% 
+% a = 0.4; % First alternate value
+% b = 0.7; % Second alternate value
+% 
+% B(1, 1:2:end) = a * rand(1, ceil(size(B, 2) / 2)); % Set elements at odd indices to 'a'
+% B(1, 2:2:end) = b + (1 - b) * rand(1, floor(size(B, 2) / 2)); % Set elements at even indices to 'b'
+% 
 % var_mat = B;
 
+%imagesc(res_mat)
+%imagesc(var_mat(1,:))
 %% User-defined values for V_c and resistor matrix
 
 % %these are the values for the resistor between two cells
@@ -107,7 +120,7 @@ disp(' ')
 %% Plotting graphs
 
 %plot_sep(Y, t); %plot separate graphs
-%plot_overlap(Y, t); %plot overlapping graphs
+plot_overlap(Y, t); %plot overlapping graphs
 
 disp("Plotting completed:")
 toc;
@@ -118,13 +131,15 @@ disp(' ')
 attr_mat = attrib(Y, t);
 %disp(attr_mat);
 
+
+
 disp("Calculation of attributes completed:")
 toc;
 disp(' ')
 
 %% Displaying the attributes as a look-up table
 
-matrixToTable(attr_mat, var_mat)
+%matrixToTable(attr_mat, var_mat)
 
 %% Plotting pixel values as images
 
@@ -354,15 +369,15 @@ function attr_mat = attrib(inp_mat, t)
     
             phase_diff = 360 * delta / av_tp;
             
-            %phase_scaled = mod(phase_diff + 180, 360) - 180; %phase difference in [-180, 180]
-            phase_scaled = mod(phase_diff, 360); %phase difference in [0, 360]
+            phase_scaled = mod(phase_diff + 180, 360) - 180; %phase difference in [-180, 180]
+            %phase_scaled = mod(phase_diff, 360); %phase difference in [0, 360]
             
             r1 = 2 * num +2;
             r2= 2* num + 3;
             attr_mat(r1, a) = phase_scaled;
     
             %for pixel values
-            if phase_scaled >= 180 
+            if phase_scaled <= 0 
                 attr_matr(r2, a) = 0;    %black pixel
             else
                 attr_mat(r2, a) = 1;     %white pixel

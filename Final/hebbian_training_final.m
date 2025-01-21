@@ -85,8 +85,8 @@ imagesc(linear_res_mat);
 
 
 %% Sigmoid Mappin %%%%%%%%%%%%%%%%%%%%
-sig_res =  (1 ./ (1 + exp(-weights_vector)))*10000;
-sig_res_mat =  (1 ./ (1 + exp(-weights_matrix)))*10000;
+sig_res =  (1 ./ (1 + exp(-weights_vector)))*100000;
+sig_res_mat =  (1 ./ (1 + exp(-weights_matrix)))*100000;
 minValue2 = min(sig_res(:)); % Overall minimum
 maxValue2 = max(sig_res(:)); % Overall maximum
 
@@ -186,59 +186,59 @@ save('log_mat.mat', 'log_mat');
 imagesc(log_mat);
 
 
-%% DEBUG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-clear
-
-% Define image dimensions and number of training images
-rows = 2;
-cols = 2;
-num_images = 3;
-num_pixels = rows * cols;
-
-% Initialize a matrix to store the flattened training images
-training_images = zeros(num_pixels, num_images);
-
-filename = {'Test1.txt', 'Test2.txt', 'Test3.txt'};
-
-
-% Load 3 binary images
-for i = 1:3
-    data = readmatrix(filename{i});
-    disp('data is:');
-    disp(data);
-    img = imbinarize(data);  % Ensure binary format (optional)
-    img_vector = img(:);    % Flatten the image into a vector
-    disp(img_vector);
-    training_images(:, i) = img_vector;
-end
-
-disp('training_images is:')
-disp(training_images)
-
-
-% Initialize the weights matrix
-weights_matrix_debug = zeros(num_pixels, num_pixels);
-
-% Compute the weights matrix using the Hebbian Learning Rule
-for i = 1:num_pixels
-    for j = 1:num_pixels
-        if i ~= j
-            % Compute the weight between pixel i and pixel j
-            for col=1:3
-                weights_matrix_debug(i, j) = weights_matrix_debug(i, j) + training_images(i, col) .* training_images(j, col);
-            end
-        end
-    end
-end
-
-weights_matrix_debug = weights_matrix_debug/4;
-
-% Display the resulting weights matrix
-disp('Weights matrix:');
-disp(weights_matrix_debug);
-
-% Save the weights matrix to a file
-save('weights_matrix_debug.mat', 'weights_matrix_debug');
-
-imagesc(weights_matrix_debug);
+% %% DEBUG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% clear
+% 
+% % Define image dimensions and number of training images
+% rows = 2;
+% cols = 2;
+% num_images = 3;
+% num_pixels = rows * cols;
+% 
+% % Initialize a matrix to store the flattened training images
+% training_images = zeros(num_pixels, num_images);
+% 
+% filename = {'Test1.txt', 'Test2.txt', 'Test3.txt'};
+% 
+% 
+% % Load 3 binary images
+% for i = 1:3
+%     data = readmatrix(filename{i});
+%     disp('data is:');
+%     disp(data);
+%     img = imbinarize(data);  % Ensure binary format (optional)
+%     img_vector = img(:);    % Flatten the image into a vector
+%     disp(img_vector);
+%     training_images(:, i) = img_vector;
+% end
+% 
+% disp('training_images is:')
+% disp(training_images)
+% 
+% 
+% % Initialize the weights matrix
+% weights_matrix_debug = zeros(num_pixels, num_pixels);
+% 
+% % Compute the weights matrix using the Hebbian Learning Rule
+% for i = 1:num_pixels
+%     for j = 1:num_pixels
+%         if i ~= j
+%             % Compute the weight between pixel i and pixel j
+%             for col=1:3
+%                 weights_matrix_debug(i, j) = weights_matrix_debug(i, j) + training_images(i, col) .* training_images(j, col);
+%             end
+%         end
+%     end
+% end
+% 
+% weights_matrix_debug = weights_matrix_debug/4;
+% 
+% % Display the resulting weights matrix
+% disp('Weights matrix:');
+% disp(weights_matrix_debug);
+% 
+% % Save the weights matrix to a file
+% save('weights_matrix_debug.mat', 'weights_matrix_debug');
+% 
+% imagesc(weights_matrix_debug);

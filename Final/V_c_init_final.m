@@ -1,9 +1,8 @@
 % Transform file.txt pattern into init capacitor voltage
-clear all
 
 % Define image dimensions and number of training images
-rows = 5;
-cols = 6;
+rows = 7;
+cols = 7;
 num_images = 7;
 num_pixels = rows * cols;
 
@@ -40,7 +39,13 @@ for i = 1:num_files
     img_vector = img(:);    % Flatten the image into a vector
     training_images(:, i) = img_vector;
 end
-tar_val = 0.69;
-V_c_init_col_mat = training_images .* tar_val;
+target_value_0 = 0.2;
+target_value_1 = 0.6;
+% Replace values using logical indexing
+training_images(training_images == 0) = target_value_0;
+training_images(training_images == 1) = target_value_1;
+V_c_init_col_mat = training_images;
+V_c_init_col_mat (1, :) = 0; 
+
 
 save('V_c_init_col_mat.mat',"V_c_init_col_mat");
